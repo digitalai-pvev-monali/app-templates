@@ -38,8 +38,14 @@ This is a **functional prototype** of the eGuru SCV application, enhanced with i
 ---
 
 ## 🧱 Architecture  
-flowchart TD
+
+(GitHub will render Mermaid diagrams in README if your viewer supports it; otherwise use a renderer that supports Mermaid.)
+
+Variant 1 — Horizontal (LR) — clean pipeline with grouping and arrow labels
+```mermaid
+flowchart LR
   subgraph Sources["Source Tables"]
+    direction TB
     A[Customer Pipeline]
     B[Customer Journey]
     C[Call Log Detail]
@@ -47,38 +53,38 @@ flowchart TD
     F[Retail]
   end
 
-  subgraph Engine["SCV Scoring Engine"]
-    direction TB
-    S1[Read sources]
-    S2[Join & Transform]
-    S3[Compute Scores]
-    S4[Write (MERGE)]
+  subgraph Processing["Scoring Engine"]
+    D[SCV Scoring Engine]
   end
 
-  G[(scv_customer_score<br/>Delta Table)]
+  subgraph Storage["Delta Layer"]
+    G[(scv_customer_score<br/>Delta Table)]
+  end
 
-  A -->|opty_id| S1
-  B -->|opty_id| S1
-  C -->|opty_id| S1
-  E -->|Dealer_Code| S1
-  F -->|Dealer_Code| S1
+  subgraph Consumers["Applications & Dashboards"]
+    H[SCV Lead App<br/>(Gradio + Databricks)]
+    I[Analytics Dashboard<br/>(Databricks)]
+  end
 
-  S1 --> S2 --> S3 --> S4
-  S4 -->|MERGE / upsert| G
+  A -->|opty_id| D
+  B -->|opty_id| D
+  C -->|opty_id| D
+  E -->|Dealer_Code| D
+  F -->|Dealer_Code| D
 
-  G --> H[SCV Lead App<br/>(Gradio + Databricks)]
-  G --> I[Analytics Dashboard<br/>(Databricks)]
+  D -->|MERGE / upsert| G
+  G --> H
+  G --> I
 
-  classDef sources fill:#f8fafc,stroke:#334155;
-  classDef engine fill:#fff4e6,stroke:#b07b00;
-  classDef delta fill:#eef2ff,stroke:#3730a3,stroke-width:2px;
-  classDef consumers fill:#f0fdf4,stroke:#065f46;
+  classDef sources fill:#f3f4f6,stroke:#333,stroke-width:1px;
+  classDef engine fill:#fff7cc,stroke:#b58900,stroke-width:1px;
+  classDef storage fill:#e6f7ff,stroke:#0077b6,stroke-width:2px;
+  classDef consumers fill:#ecfdf5,stroke:#0f5132,stroke-width:1px;
 
   class A,B,C,E,F sources;
-  class S1,S2,S3,S4 engine;
-  class G delta;
+  class D engine;
+  class G storage;
   class H,I consumers;
-
 
 ---
 
