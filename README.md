@@ -39,17 +39,38 @@ This is a **functional prototype** of the eGuru SCV application, enhanced with i
 
 ## 🧱 Architecture  
 
-flowchart TD
-    A[Customer Pipeline] -->|opty_id| D[SCV Scoring Engine]
-    B[Customer Journey] -->|opty_id| D
-    C[Call Log Detail] -->|opty_id| D
-    E[Stock] -->|Dealer_Code| D
-    F[Retail] -->|Dealer_Code| D
+flowchart LR
+  subgraph Sources["Source Tables"]
+    direction TB
+    A["Customer Pipeline"]
+    B["Customer Journey"]
+    C["Call Log Detail"]
+    E["Stock"]
+    F["Retail"]
+  end
 
-    D --> G[(scv_customer_score<br/>Delta Table)]
+  subgraph Processing["Scoring Engine"]
+    D["SCV Scoring Engine"]
+  end
 
-    G --> H[SCV Lead App<br/>(Gradio + Databricks)]
-    G --> I[Analytics Dashboard<br/>(Databricks)]
+  subgraph Storage["Delta Layer"]
+    G["scv_customer_score\nDelta Table"]
+  end
+
+  subgraph Consumers["Applications & Dashboards"]
+    H["SCV Lead App\n(Gradio + Databricks)"]
+    I["Analytics Dashboard\n(Databricks)"]
+  end
+
+  A -->|opty_id| D
+  B -->|opty_id| D
+  C -->|opty_id| D
+  E -->|Dealer_Code| D
+  F -->|Dealer_Code| D
+
+  D -->|MERGE / upsert| G
+  G --> H
+  G --> I
 
 
 ---
