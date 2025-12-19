@@ -39,38 +39,71 @@ This is a **functional prototype** of the eGuru SCV application, enhanced with i
 
 ## 🧱 Architecture  
 
-flowchart LR
-  subgraph Sources["Source Tables"]
-    direction TB
-    A["Customer Pipeline"]
-    B["Customer Journey"]
-    C["Call Log Detail"]
-    E["Stock"]
-    F["Retail"]
-  end
++------------------------+
+|   Customer Pipeline    |
+| (Leads & Opportunities)|
++-----------+------------+
+            |
+            | opty_id
+            v
++------------------------+      +------------------------+
+|   Customer Journey     |      |   Call Log Detail      |
+| (Lifecycle & Touches)  |      | (Calls & Follow-ups)   |
++-----------+------------+      +-----------+------------+
+            |                               |
+            | opty_id                       | opty_id
+            +---------------+---------------+
+                            |
+                            v
++----------------------------------------------------+
+|                 SCV Scoring Engine                 |
+|        (Business Rules & Intelligence Layer)       |
+|                                                    |
+|  Lead-level Scores                                 |
+|  ----------------                                 |
+|  • lead_age_score                                  |
+|  • expected_closure_score                          |
+|  • opty_category_score                             |
+|  • lead_classification_score                       |
+|  • customer_type_score                             |
+|  • followup_score                                  |
+|  • avg_call_duration_score                         |
+|                                                    |
+|  Dealer & Supply Signals                           |
+|  ---------------------                             |
+|  • stock_availability_score                        |
+|                                                    |
++----------------------+-----------------------------+
+                       |
+                       | Dealer_Code
+                       v
+        +------------------------+      +----------------------+
+        |        Stock           |      |        Retail        |
+        | (Dealer Inventory)    |      | (Vehicle Sales Data) |
+        +------------------------+      +----------------------+
+                       |
+                       | Enriched scoring signals
+                       v
+        +------------------------------------------------+
+        | scv_customer_score (Delta Table)               |
+        | --------------------------------------------- |
+        | Single Source of Truth                         |
+        | Catalog : tmdai_hackathon                      |
+        | Schema  : tmdai_hackathon_team_4               |
+        +--------------------+---------------------------+
+                             |
+             +---------------+---------------+
+             |                               |
+             v                               v
++---------------------------+     +---------------------------+
+|  SCV Lead Intelligence    |     |   Analytics Dashboard     |
+|  Mobile App (Gradio)     |     |   (Databricks Dashboard)  |
+|                           |     |                           |
+| - Top 20 Leads            |     | - Enquiry-wise Top 5     |
+| - Next Best Customer      |     | - Leads by PPL           |
+| - Dealer Prioritization   |     | - Score Distribution    |
++---------------------------+     +---------------------------+
 
-  subgraph Processing["Scoring Engine"]
-    D["SCV Scoring Engine"]
-  end
-
-  subgraph Storage["Delta Layer"]
-    G["scv_customer_score\nDelta Table"]
-  end
-
-  subgraph Consumers["Applications & Dashboards"]
-    H["SCV Lead App\n(Gradio + Databricks)"]
-    I["Analytics Dashboard\n(Databricks)"]
-  end
-
-  A -->|opty_id| D
-  B -->|opty_id| D
-  C -->|opty_id| D
-  E -->|Dealer_Code| D
-  F -->|Dealer_Code| D
-
-  D -->|MERGE / upsert| G
-  G --> H
-  G --> I
 
 
 ---
