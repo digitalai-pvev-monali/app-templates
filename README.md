@@ -38,18 +38,18 @@ This is a **functional prototype** of the eGuru SCV application, enhanced with i
 ---
 
 ## 🧱 Architecture  
-Existing eGuru SCV App
+Customer Pipeline
         |
-        | (Enhanced with Top Leads Intelligence)
+        | (opty_id)
         v
-[Our SCV Scoring Engine] ← Pulls from existing data sources
-        |
-        v
-Prioritized Top Leads → Displayed within eGuru Interface
-        |
-        +--> Same user workflow
-        +--> Enhanced with scores & priorities
-        +--> Zero retraining needed
+Customer Journey  ----+
+                      |--> SCV Scoring Engine --> scv_customer_score
+Call Log Detail  ------+              |
+                                     |
+                          +----------+-----------+
+                          |                      |
+                    Mobile SCV App       Databricks Dashboard
+
 
 ---
 
