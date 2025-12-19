@@ -38,17 +38,52 @@ This is a **functional prototype** of the eGuru SCV application, enhanced with i
 ---
 
 ## 🧱 Architecture  
-Customer Pipeline
-        |
-        | (opty_id)
-        v
-Customer Journey  ----+
-                      |--> SCV Scoring Engine --> scv_customer_score
-Call Log Detail  ------+              |
-                                     |
-                          +----------+-----------+
-                          |                      |
-                    Mobile SCV App       Databricks Dashboard
+(GitHub will render Mermaid diagrams in README if your viewer supports it; otherwise use a renderer that supports Mermaid.)
+
+Variant 1 — Horizontal (LR) — clean pipeline with grouping and arrow labels
+```mermaid
+flowchart LR
+  subgraph Sources["Source Tables"]
+    direction TB
+    A[Customer Pipeline]
+    B[Customer Journey]
+    C[Call Log Detail]
+    E[Stock]
+    F[Retail]
+  end
+
+  subgraph Processing["Scoring Engine"]
+    D[SCV Scoring Engine]
+  end
+
+  subgraph Storage["Delta Layer"]
+    G[(scv_customer_score<br/>Delta Table)]
+  end
+
+  subgraph Consumers["Applications & Dashboards"]
+    H[SCV Lead App<br/>(Gradio + Databricks)]
+    I[Analytics Dashboard<br/>(Databricks)]
+  end
+
+  A -->|opty_id| D
+  B -->|opty_id| D
+  C -->|opty_id| D
+  E -->|Dealer_Code| D
+  F -->|Dealer_Code| D
+
+  D -->|MERGE / upsert| G
+  G --> H
+  G --> I
+
+  classDef sources fill:#f3f4f6,stroke:#333,stroke-width:1px;
+  classDef engine fill:#fff7cc,stroke:#b58900,stroke-width:1px;
+  classDef storage fill:#e6f7ff,stroke:#0077b6,stroke-width:2px;
+  classDef consumers fill:#ecfdf5,stroke:#0f5132,stroke-width:1px;
+
+  class A,B,C,E,F sources;
+  class D engine;
+  class G storage;
+  class H,I consumers;
 
 
 ---
