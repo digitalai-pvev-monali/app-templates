@@ -38,7 +38,18 @@ This is a **functional prototype** of the eGuru SCV application, enhanced with i
 ---
 
 ## 🧱 Architecture  
-`
+Existing eGuru SCV App
+        |
+        | (Enhanced with Top Leads Intelligence)
+        v
+[Our SCV Scoring Engine] ← Pulls from existing data sources
+        |
+        v
+Prioritized Top Leads → Displayed within eGuru Interface
+        |
+        +--> Same user workflow
+        +--> Enhanced with scores & priorities
+        +--> Zero retraining needed
 
 ---
 
