@@ -38,72 +38,93 @@ This is a **functional prototype** of the eGuru SCV application, enhanced with i
 ---
 
 ## 🧱 Architecture  
-
-+------------------------+
-|   Customer Pipeline    |
-| (Leads & Opportunities)|
-+-----------+------------+
-            |
-            | opty_id
-            v
-+------------------------+      +------------------------+
-|   Customer Journey     |      |   Call Log Detail      |
-| (Lifecycle & Touches)  |      | (Calls & Follow-ups)   |
-+-----------+------------+      +-----------+------------+
-            |                               |
-            | opty_id                       | opty_id
-            +---------------+---------------+
-                            |
-                            v
-+----------------------------------------------------+
-|                 SCV Scoring Engine                 |
-|        (Business Rules & Intelligence Layer)       |
-|                                                    |
-|  Lead-level Scores                                 |
-|  ----------------                                 |
-|  • lead_age_score                                  |
-|  • expected_closure_score                          |
-|  • opty_category_score                             |
-|  • lead_classification_score                       |
-|  • customer_type_score                             |
-|  • followup_score                                  |
-|  • avg_call_duration_score                         |
-|                                                    |
-|  Dealer & Supply Signals                           |
-|  ---------------------                             |
-|  • stock_availability_score                        |
-|                                                    |
-+----------------------+-----------------------------+
-                       |
-                       | Dealer_Code
-                       v
-        +------------------------+      +----------------------+
-        |        Stock           |      |        Retail        |
-        | (Dealer Inventory)    |      | (Vehicle Sales Data) |
-        +------------------------+      +----------------------+
-                       |
-                       | Enriched scoring signals
-                       v
-        +------------------------------------------------+
-        | scv_customer_score (Delta Table)               |
-        | --------------------------------------------- |
-        | Single Source of Truth                         |
-        | Catalog : tmdai_hackathon                      |
-        | Schema  : tmdai_hackathon_team_4               |
-        +--------------------+---------------------------+
-                             |
-             +---------------+---------------+
-             |                               |
-             v                               v
-+---------------------------+     +---------------------------+
-|  SCV Lead Intelligence    |     |   Analytics Dashboard     |
-|  Mobile App (Gradio)     |     |   (Databricks Dashboard)  |
-|                           |     |                           |
-| - Top 20 Leads            |     | - Enquiry-wise Top 5     |
-| - Next Best Customer      |     | - Leads by PPL           |
-| - Dealer Prioritization   |     | - Score Distribution    |
-+---------------------------+     +---------------------------+
-
+flowchart TD
+    %% Data Sources Layer
+    A[Customer Pipeline<br/>Leads & Opportunities]
+    B[Customer Journey<br/>Lifecycle & Touchpoints]
+    C[Call Log Detail<br/>Calls & Follow-ups]
+    
+    %% Scoring Engine
+    D[SCV Scoring Engine<br/>Business Rules & Intelligence Layer]
+    
+    %% Dealer & Supply Data
+    E[Stock<br/>Dealer Inventory]
+    F[Retail<br/>Vehicle Sales Data]
+    
+    %% Output Layer
+    G[scv_customer_score<br/>Delta Table<br/>Single Source of Truth]
+    
+    %% Application Layer
+    H[SCV Lead Intelligence<br/>Mobile App<br/>Gradio Interface]
+    I[Analytics Dashboard<br/>Databricks Dashboard]
+    
+    %% Data Flow
+    A -- opty_id --> D
+    B -- opty_id --> D
+    C -- opty_id --> D
+    E -- Dealer_Code --> D
+    F -- Dealer_Code --> D
+    
+    %% Processing Flow
+    D -- Enriched scoring --> G
+    
+    %% Consumption Flow
+    G --> H
+    G --> I
+    
+    %% Scoring Components
+    subgraph D_sub [Scoring Components]
+        D1[Lead-level Scores]
+        D2[Dealer & Supply Signals]
+        
+        subgraph D1_sub [Lead Scoring]
+            D1a[lead_age_score]
+            D1b[expected_closure_score]
+            D1c[opty_category_score]
+            D1d[lead_classification_score]
+            D1e[customer_type_score]
+            D1f[followup_score]
+            D1g[avg_call_duration_score]
+        end
+        
+        subgraph D2_sub [Dealer Signals]
+            D2a[stock_availability_score]
+            D2b[market_competition_score]
+            D2c[dealer_performance_score]
+        end
+    end
+    
+    %% App Features
+    subgraph H_sub [Mobile App Features]
+        H1[Top 20 Leads]
+        H2[Next Best Customer]
+        H3[Dealer Prioritization]
+        H4[Daily Action Items]
+    end
+    
+    subgraph I_sub [Dashboard Insights]
+        I1[Enquiry-wise Top 5]
+        I2[Leads by PPL]
+        I3[Score Distribution]
+        I4[Regional Performance]
+    end
+    
+    %% Catalog Info
+    G_details[<b>Catalog:</b> tmdai_hackathon<br/><b>Schema:</b> tmdai_hackathon_team_4<br/><b>Table:</b> scv_customer_score]
+    G --> G_details
+    
+    %% Styling
+    classDef dataSource fill:#e1f5fe,stroke:#01579b,stroke-width:2px
+    classDef engine fill:#f3e5f5,stroke:#4a148c,stroke-width:2px
+    classDef output fill:#e8f5e8,stroke:#1b5e20,stroke-width:2px
+    classDef app fill:#fff3e0,stroke:#e65100,stroke-width:2px
+    classDef dashboard fill:#fce4ec,stroke:#880e4f,stroke-width:2px
+    
+    class A,B,C,E,F dataSource
+    class D engine
+    class G output
+    class H app
+    class I dashboard
 
 
 ---
