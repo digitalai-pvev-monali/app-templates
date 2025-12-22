@@ -1,4 +1,4 @@
-<img width="204" height="114" alt="image" src="https://github.com/user-attachments/assets/607a0081-5d54-49b2-bb68-0894d2490987" /># 🏆 SCV Sales Intelligence Platform  
+# 🏆 SCV Sales Intelligence Platform  
 
 **TMDAi Hackathon 2025 — Team 4**  
 *Mobile-First | AI-Ready | Action-Driven*
