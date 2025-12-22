@@ -1,4 +1,4 @@
-# 🏆 SCV Sales Intelligence Platform  
+<img width="204" height="114" alt="image" src="https://github.com/user-attachments/assets/607a0081-5d54-49b2-bb68-0894d2490987" /># 🏆 SCV Sales Intelligence Platform  
 
 **TMDAi Hackathon 2025 — Team 4**  
 *Mobile-First | AI-Ready | Action-Driven*
@@ -37,7 +37,7 @@ This is a **functional prototype** of the eGuru SCV application, enhanced with i
 
 ---
 
-## 🧱 Architecture  
+## 🧱 High Level Architecture  
 <img width="530" height="401" alt="image" src="https://github.com/user-attachments/assets/61a8c442-a3e7-43eb-8f88-7d0ffdc8c809" />
 
 
@@ -92,7 +92,7 @@ This makes the solution **idempotent, scalable, and production-ready**.
 
 ## 📁 Scoring Engine  
 **Script Location:**  
-`/Workspace/TMDAi_Hackathon_Team_4/svc_score_script.py`  
+`/Workspace/TMDAi_Hackathon_Team_4/svc_customer_score_script.py`  
 
 **Responsibilities:**  
 - Read source tables  
@@ -114,6 +114,253 @@ This makes the solution **idempotent, scalable, and production-ready**.
 
 ---
 
+##  🌍 Macro Market Hotspot Detection & Alerting System (SQL Gold Tables + Python Alert Agent | 5-Day View)  
+**What Problem Does This Solve:** 
+- Sales opportunities are often missed because rising demand in specific micro-markets (Talukas) is not detected early, or supply is not aligned with demand. 
+**Key Capabilities:**  
+- 📈 Detects **high-growth Talukas**
+- ⚖️ Identifies **demand–supply mismatches**
+- 🚨 Sends **automated alerts to leadership**
+- ⚡ Enables **fast, data-backed decisions**
+  **High Level Architect:**
+  ┌─────────────────────────┐ 
+
+│   Source Data Systems   │ 
+
+│-------------------------│ 
+
+│ • Dealer Leads          │ 
+
+│ • Customer Intent       │ 
+
+│ • Retail Sales          │ 
+
+│ • Vehicle Stock         │ 
+
+└───────────┬─────────────┘ 
+
+            │ 
+
+            ▼ 
+
+┌─────────────────────────┐ 
+
+│  SQL Feature Engineering│ 
+
+│-------------------------│ 
+
+│ • Geo Mapping           │ 
+
+│ • 5-Day Metrics         │ 
+
+│ • Growth Calculations   │ 
+
+└───────────┬─────────────┘ 
+
+            │ 
+
+            ▼ 
+
+┌─────────────────────────┐ 
+
+│  Gold Market Tables     │ 
+
+│-------------------------│ 
+
+│ • Dealer Features       │ 
+
+│ • Taluka Hotspots       │ 
+
+└───────────┬─────────────┘ 
+
+            │ 
+
+            ▼ 
+
+┌─────────────────────────┐ 
+
+│ Python Alert Agent      │ 
+
+│-------------------------│ 
+
+│ • Priority Scoring      │ 
+
+│ • Top 3 Ranking         │ 
+
+│ • Email Notification    │ 
+
+└─────────────────────────┘ 
+
+---
+## 🧮 SQL Feature Engineering Pipeline (Gold Tables)
+### 3.1 Dealer → Latest Geography Mapping
+**Purpose:**  
+Ensure every dealer is mapped to the **most recent Taluka & District** based on latest activity.
+
+**Logic:**
+- Uses latest available pipeline stage (C0 → C3)
+- Picks the most recent geography per dealer
+
+**Output View:**  
+`dealer_geo`
+
+---
+
+### 3.2 Dealer Lead & Intent Metrics (5-Day Window)
+**Purpose:**  
+Measure **current demand momentum** and compare it with historical behavior.
+
+**Metrics:**
+- Leads in last 5 days
+- Leads in previous window
+- High-intent leads (Hot / Warm / Live Deal)
+- Intent growth %
+
+**Output View:**  
+`dealer_leads_5d`
+
+---
+
+### 3.3 Dealer Retail Performance
+**Purpose:**  
+Track whether **demand is converting into sales**.
+
+**Metrics:**
+- Retail volume (current vs previous window)
+
+**Output View:**  
+`dealer_retail_5d`
+
+---
+
+### 3.4 Dealer Stock Availability
+**Purpose:**  
+Assess **supply readiness**.
+
+**Metrics:**
+- Total stock
+- Saleable stock
+
+**Output View:**  
+`dealer_stock`
+
+---
+
+### 3.5 Dealer Market Feature Gold Table
+**Purpose:**  
+Create a **single dealer-level feature table** combining all demand and supply signals.
+
+**Metrics Included:**
+- Leads, intent, retail, stock
+- Lead growth
+- Intent growth
+- Retail growth
+
+**Gold Table:**  
+`dealer_market_features_5d`
+
+---
+
+### 3.6 Taluka-Level Hotspot Aggregation
+**Purpose:**  
+Aggregate dealer signals to detect **micro-market behavior**.
+
+**Metrics:**
+- Total leads, intent, retail, stock
+- Average growth rates
+- Dealer count
+
+**Hotspot Classification Logic:**
+
+| Condition | Status |
+|---------|--------|
+| < 2 dealers | NOISE |
+| High lead + intent + retail growth | HOTSPOT |
+| High lead growth | EMERGING |
+| Else | STABLE |
+
+**Gold Table:**  
+`macro_market_hotspot_taluka_5d`
+
+---
+
+### 3.7 District-wise Top 3 Talukas
+**Purpose:**  
+Surface the **most actionable Talukas per district**.
+
+**Logic:**
+- Rank by hotspot category
+- Then by lead volume
+
+**Output View:**  
+`district_top3_talukas`
+
+---
+## 🚨 Python Alert Agent (Automated Notifications)
+Automatically notify leadership about the **Top 3 Taluka Hotspots** across districts.
+---
+
+### 4.1 Input
+Reads from:
+- `macro_market_hotspot_taluka_5d`
+
+Filters:
+- HOTSPOT
+- EMERGING
+
+---
+
+### 4.2 Business Priority Scoring
+
+Each Taluka is scored using **business-driven logic**:
+
+| Signal | Impact |
+|------|--------|
+| HOTSPOT | High Priority |
+| EMERGING | Medium Priority |
+| Lead growth | Demand momentum |
+| Intent growth | Buyer seriousness |
+| Zero retail | Supply gap |
+| Excess stock | Lower urgency |
+
+➡ Ensures **priority ≠ volume-only**, but **true business impact**.
+
+---
+
+### 4.3 Top 3 Taluka Selection
+- Ranked by priority score
+- Only **Top 3 Talukas** selected per alert
+
+---
+
+### 4.4 Explainable Reason Codes
+Each Taluka includes:
+- Lead volume & growth %
+- High-intent lead count
+- Retail gap (if any)
+- Available stock
+
+➡ Alerts are **actionable, not just informative**.
+
+---
+
+### 4.5 HTML Email Alert
+**Includes:**
+- Styled, readable table
+- Color-coded hotspot status
+- Business interpretation
+
+**Subject Example:**  
+🚨 *Macro Market Hotspot Alert | Top 3 Talukas | <Date>*
+
+---
+
+### 4.6 Automated Delivery
+- SMTP (Gmail)
+- Fully automated
+- No manual intervention
+---
+
 ## 📈 Databricks Dashboard – Strategic View  
 **Dashboard Name:** `team4`  
 
@@ -132,7 +379,10 @@ Supports **regional and leadership decision-making**.
 - **Scoring Engine:** Python  
 - **UI:** Gradio  
 - **Analytics:** Databricks Dashboard  
-- **Deployment:** Databricks Apps  
+- **Deployment:** Databricks Apps
+- **Package:** Pandas
+- **EMAIL Protocol:** SMTP
+
 
 ---
 
