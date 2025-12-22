@@ -124,8 +124,8 @@ This makes the solution **idempotent, scalable, and production-ready**.
 - ⚡ Enables **fast, data-backed decisions**
 
 ---
-  **High Level Architect:**
-**<img width="229" height="510" alt="image" src="https://github.com/user-attachments/assets/bb8fe66d-278c-4a3a-bf99-1421d8c11ad7" />**
+  ##  🧱 High Level Architect
+  <img width="229" height="510" alt="image" src="https://github.com/user-attachments/assets/bb8fe66d-278c-4a3a-bf99-1421d8c11ad7" />
 
 ---
 ## 🧮 SQL Feature Engineering Pipeline (Gold Tables)
